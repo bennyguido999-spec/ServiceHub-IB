@@ -608,7 +608,7 @@ if st.button("📄 Genera Report PDF"):
         "per ciascun servizio selezionato, evidenziando le aree con maggiore domanda."
     )
 
-    pdf_bytes = pdf.output(dest="S").encode("latin-1")
+pdf_bytes = pdf.output(dest="S").encode("latin-1")
 
 st.download_button(
     label="📄 Scarica Report PDF",
