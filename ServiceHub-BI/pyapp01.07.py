@@ -588,7 +588,7 @@ if st.button("📄 Genera Report PDF"):
     pdf.set_text_color(0, 0, 0)
 
     fig, ax = plt.subplots(figsize=(7, 3.2))
-    ax.bar(dettaglio_richieste["Servizio"], dettaglio_richieste["Richieste"])
+    ax.bar(classifica_servizi["Servizio"], classifica_servizi["Richieste"])
     ax.set_title("Richieste per servizio")
     ax.set_xlabel("Servizio")
     ax.set_ylabel("Richieste")
