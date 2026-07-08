@@ -608,15 +608,14 @@ if st.button("📄 Genera Report PDF"):
         "per ciascun servizio selezionato, evidenziando le aree con maggiore domanda."
     )
 
-    pdf.output("ServiceHub_Report.pdf")
+    pdf_bytes = pdf.output(dest="S").encode("latin-1")
 
-    with open("ServiceHub_Report.pdf", "rb") as file:
-        st.download_button(
-            "⬇️ Scarica Report PDF",
-        file,
-        file_name="ServiceHub_Report.pdf",
-        mime="application/pdf"
-        )
+st.download_button(
+    label="📄 Scarica Report PDF",
+    data=pdf_bytes,
+    file_name="ServiceHub_Report.pdf",
+    mime="application/pdf"
+)
 st.markdown("---")
 st.subheader("🗃️ Struttura dati e modello a stella")
 st.info("""
