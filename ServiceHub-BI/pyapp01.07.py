@@ -630,7 +630,7 @@ if st.button("📄 Genera Report PDF"):
 
     pdf.set_font("Arial", "", 9)
 
-    for index, row in dettaglio_richieste.iterrows():
+    for index, row in classifica_servizi.iterrows():
         pdf.cell(45, 8, str(row["Servizio"]), border=1)
         pdf.cell(35, 8, str(row["Richieste"]), border=1)
         pdf.cell(45, 8, str(row["Valutazione media"]), border=1)
@@ -640,8 +640,8 @@ if st.button("📄 Genera Report PDF"):
     pdf.ln(8)
 
     # Analisi sintetica
-    servizio_top = dettaglio_richieste.sort_values(by="Richieste", ascending=False).iloc[0]["Servizio"]
-    fatturato_top = dettaglio_richieste.sort_values(by="Fatturato (€)", ascending=False).iloc[0]["Servizio"]
+    servizio_top = classifica_servizi.sort_values(by="Richieste", ascending=False).iloc[0]["Servizio"]
+    fatturato_top = classifica_servizi.sort_values(by="Fatturato (€)", ascending=False).iloc[0]["Servizio"]
     
     pdf.set_fill_color(245, 245, 245)
     pdf.set_font("Arial", "B", 12)
@@ -667,7 +667,7 @@ if st.button("📄 Genera Report PDF"):
     pdf.set_text_color(0, 0, 0)
 
     fig, ax = plt.subplots(figsize=(7, 3.2))
-    ax.bar(dettaglio_richieste["Servizio"], dettaglio_richieste["Richieste"])
+    ax.bar(classifica_servizi["Servizio"], classifica_servizi["Richieste"])
     ax.set_title("Richieste per servizio")
     ax.set_xlabel("Servizio")
     ax.set_ylabel("Richieste")
