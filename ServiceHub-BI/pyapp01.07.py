@@ -7,7 +7,9 @@ from datetime import datetime
 import os 
 import matplotlib.pyplot as plt
 import sqlite3
+from pathlib import Path
 # Configurazione della pagina
+DB_PATH = Path(__file__).resolve().parent / "servicehub.db"
 st.set_page_config(
     page_title="ServiceHub BI",
     page_icon="📊",
@@ -86,7 +88,7 @@ st.markdown("---")
 
 st.subheader("Dataset iniziale dei servizi")
 
-conn = sqlite3.connect("servicehub.db")
+conn = sqlite3.connect(DB_PATH)
 
 query = """
 SELECT
@@ -104,7 +106,7 @@ ORDER BY Richieste DESC
 classifica_servizi = pd.read_sql_query(query, conn)
 
 conn.close()
-conn = sqlite3.connect("servicehub.db")
+conn = sqlite3.connect(DB_PATH)
 
 query_dettaglio = """
 SELECT
