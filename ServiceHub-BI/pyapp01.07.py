@@ -7,8 +7,6 @@ from datetime import datetime
 import os 
 import matplotlib.pyplot as plt
 import sqlite3
-from pathlib import Path
-DB_PATH = Path(__file__).parent / "servicehub.db"
 # Configurazione della pagina
 st.set_page_config(
     page_title="ServiceHub BI",
@@ -67,28 +65,28 @@ generati dalla piattaforma ServiceHub, fornendo al gestore strumenti
 di supporto alle decisioni aziendali.
 """)
 
-st.info("Versione 1.0 - Ambiente di sviluppo configurato correttamente")
+st.info("Versione 1.0 - Prototipo completato e pronto per l'analisi dei dati")
 
 st.markdown("---")
 
-st.subheader("Stato del progetto")
+st.subheader("Stato del sistema")
 
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.metric("Database", "In progettazione")
+    st.metric("Database", "Operativo")
 
 with col2:
-    st.metric("Dataset", "Da creare")
+    st.metric("Dataset", "Generato (500 record)")
 
 with col3:
-    st.metric("Dashboard", "In sviluppo")
+    st.metric("Dashboard", "completata")
 
 st.markdown("---")
 
 st.subheader("Dataset iniziale dei servizi")
 
-conn = sqlite3.connect(DB_PATH)
+conn = sqlite3.connect("servicehub.db")
 
 query = """
 SELECT
@@ -106,7 +104,7 @@ ORDER BY Richieste DESC
 classifica_servizi = pd.read_sql_query(query, conn)
 
 conn.close()
-conn = sqlite3.connect(DB_PATH)
+conn = sqlite3.connect("servicehub.db")
 
 query_dettaglio = """
 SELECT
@@ -139,6 +137,17 @@ WHERE r.stato = 'Completata'
 
 dettaglio_richieste = pd.read_sql_query(query_dettaglio, conn)
 
+query_operativi = """
+SELECT
+    r.id_richiesta,
+    r.stato,
+    r.tempo_erogazione_min,
+    t.giorno_settimana
+FROM richieste r
+JOIN tempo t ON r.id_tempo = t.id_tempo
+"""
+
+dati_operativi = pd.read_sql_query(query_operativi, conn)
 conn.close()
 
 st.markdown("---")
@@ -150,6 +159,74 @@ Il database del prototipo è organizzato secondo una struttura a stella.
 La tabella centrale è **richieste**, che contiene i dati operativi principali.
 Attorno ad essa sono collegate le tabelle dimensionali: **clienti**, **fornitori**, **servizi** e **tempo**.
 """)
+st.markdown("---")
+
+st.subheader("📊 Indicatori operativi")
+
+totale_richieste = len(dati_operativi)
+
+richieste_completate = len(
+    dati_operativi[dati_operativi["stato"] == "Completata"]
+)
+
+richieste_annullate = len(
+    dati_operativi[dati_operativi["stato"] == "Annullata"]
+)
+
+tempo_medio = dati_operativi[
+    dati_operativi["stato"] == "Completata"
+]["tempo_erogazione_min"].mean()
+
+col1, col2, col3, col4 = st.columns(4)
+
+col1.metric("Richieste totali", totale_richieste)
+
+col2.metric("Tempo medio",f"{tempo_medio:.1f} min")
+
+col3.metric("Completate",richieste_completate)
+
+col4.metric("Annullate",richieste_annullate)
+
+traduzione_giorni = {
+    "Monday": "Lunedì",
+    "Tuesday": "Martedì",
+    "Wednesday": "Mercoledì",
+    "Thursday": "Giovedì",
+    "Friday": "Venerdì",
+    "Saturday": "Sabato",
+    "Sunday": "Domenica"
+}
+
+ordine_inglese = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday"
+]
+
+richieste_giorno = (
+    dati_operativi["giorno_settimana"]
+    .value_counts()
+    .reindex(ordine_inglese, fill_value=0)
+    .rename_axis("Giorno")
+    .reset_index(name="Richieste")
+)
+
+richieste_giorno["Giorno"] = richieste_giorno["Giorno"].map(traduzione_giorni)
+
+fig_giorni = px.bar(
+    richieste_giorno,
+    x="Giorno",
+    y="Richieste",
+    text="Richieste",
+    title="Richieste per giorno della settimana"
+)
+
+st.plotly_chart(fig_giorni, width="stretch")
+
 
 st.markdown("""
 **Fact table**
@@ -551,7 +628,7 @@ if st.button("📄 Genera Report PDF"):
 
     pdf.set_font("Arial", "", 9)
 
-    for index, row in classifica_servizi.iterrows():
+    for index, row in dettaglio_richieste.iterrows():
         pdf.cell(45, 8, str(row["Servizio"]), border=1)
         pdf.cell(35, 8, str(row["Richieste"]), border=1)
         pdf.cell(45, 8, str(row["Valutazione media"]), border=1)
@@ -561,8 +638,8 @@ if st.button("📄 Genera Report PDF"):
     pdf.ln(8)
 
     # Analisi sintetica
-    servizio_top = classifica_servizi.sort_values(by="Richieste", ascending=False).iloc[0]["Servizio"]
-    fatturato_top = classifica_servizi.sort_values(by="Fatturato (€)", ascending=False).iloc[0]["Servizio"]
+    servizio_top = dettaglio_richieste.sort_values(by="Richieste", ascending=False).iloc[0]["Servizio"]
+    fatturato_top = dettaglio_richieste.sort_values(by="Fatturato (€)", ascending=False).iloc[0]["Servizio"]
     
     pdf.set_fill_color(245, 245, 245)
     pdf.set_font("Arial", "B", 12)
@@ -588,7 +665,7 @@ if st.button("📄 Genera Report PDF"):
     pdf.set_text_color(0, 0, 0)
 
     fig, ax = plt.subplots(figsize=(7, 3.2))
-    ax.bar(classifica_servizi["Servizio"], classifica_servizi["Richieste"])
+    ax.bar(dettaglio_richieste["Servizio"], dettaglio_richieste["Richieste"])
     ax.set_title("Richieste per servizio")
     ax.set_xlabel("Servizio")
     ax.set_ylabel("Richieste")
@@ -608,14 +685,15 @@ if st.button("📄 Genera Report PDF"):
         "per ciascun servizio selezionato, evidenziando le aree con maggiore domanda."
     )
 
-    pdf_bytes = pdf.output(dest="S").encode("latin-1")
+    pdf.output("ServiceHub_Report.pdf")
 
-    st.download_button(
-        label="📄 Scarica Report PDF",
-        data=pdf_bytes,
+    with open("ServiceHub_Report.pdf", "rb") as file:
+        st.download_button(
+            "⬇️ Scarica Report PDF",
+        file,
         file_name="ServiceHub_Report.pdf",
         mime="application/pdf"
-    )
+        )
 st.markdown("---")
 st.subheader("🗃️ Struttura dati e modello a stella")
 st.info("""
