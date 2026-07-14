@@ -28,13 +28,6 @@ Dashboard dimostrativa sviluppata come Project Work.
 
 st.sidebar.markdown("---")
 
-st.sidebar.write("🏛 **Università Telematica Pegaso**")
-st.sidebar.write("🎓 **Corso di Laurea:** L-31 ")
-st.sidebar.write("👤 **Autore:** Benny Benigno Guido")
-st.sidebar.write("🆔 **Matricola:** 0312200934")
-st.sidebar.markdown("---")
-
-st.sidebar.markdown("---")
 # Titolo
 st.title("📊 ServiceHub BI")
 
@@ -248,6 +241,13 @@ servizio_selezionato = st.sidebar.selectbox(
 "🔎 Seleziona un servizio",
 ["Tutti"] + list(classifica_servizi["Servizio"])
 )
+st.sidebar.markdown("---")
+
+st.sidebar.write("🏛 **Università Telematica Pegaso**")
+st.sidebar.write("🎓 **Corso di Laurea:** L-31 ")
+st.sidebar.write("👤 **Autore:** Benny Benigno Guido")
+st.sidebar.write("🆔 **Matricola:** 0312200934")
+st.sidebar.markdown("---")
 
 if servizio_selezionato == "Tutti":
     dati_filtrati = classifica_servizi
